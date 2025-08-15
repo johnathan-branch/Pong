@@ -3,6 +3,7 @@ from time import sleep
 
 from misc.singleton_decorator import singleton
 from misc.get_parent_dir import ROOT_DIR
+from pong_game_classes.ai_controller import AIController
 from pong_game_classes.ball import PongBall
 from pong_game_classes.paddle import PongPaddle
 from pong_game_classes.player import Player
@@ -10,16 +11,18 @@ from pong_game_classes.player import Player
 @singleton
 class PongGame:
 
-    def __init__(self, screen_width:int=1280, screen_length:int=720):
+    def __init__(self, screen_width:int=1280, screen_length:int=720, mode:str="ai", ai_difficulty:str="easy"):
         pygame.init()
         
+        self.ai_difficulty: str = ai_difficulty
+        self.mode: str = mode
         self._debug_game: bool = False # set to True to assert debug print statements
         self.has_user_started_game: bool = False
         self.quit_game: bool = False
-        self.points_per_game: int = 5 # change this to set the match point
+        self.points_per_game: int = 3 # change this to set the match point
         self.dt: float = 0.0
         self._caption: str = "PY-PONG!"
-        self._icon_path: str = str(ROOT_DIR) + "\\resouces\\icons\\pong.jpg"
+        self._icon_path: str = str(ROOT_DIR) + "\\resources\\icons\\pong.jpg"
         
         self.screen = pygame.display.set_mode(size=(screen_width, screen_length))
         self.font = pygame.font.SysFont(name="Comic Sans MS", size=30)
@@ -138,7 +141,7 @@ class PongGame:
         """
             Scans for user keyboard presses and moves the paddles accordingly.
             Left paddle controls: 'a' moves the left paddle up, 's' moves the left paddle down.
-            Right paddle controls: 'up arrow' moves the right paddle up, 'down arrow' moves the right paddle down.
+            Right paddle controls (2-player mode only): 'up arrow' moves the right paddle up, 'down arrow' moves the right paddle down.
         """
         keys_pressed = pygame.key.get_pressed()
 
@@ -146,10 +149,23 @@ class PongGame:
             left_paddle_obj.move_up()
         if keys_pressed[pygame.K_s]:
             left_paddle_obj.move_down()
-        if keys_pressed[pygame.K_DOWN]:
-            right_paddle_obj.move_down()
-        if keys_pressed[pygame.K_UP]:
-            right_paddle_obj.move_up()
+        
+        if self.mode == "2p":
+            if keys_pressed[pygame.K_DOWN]:
+                right_paddle_obj.move_down()
+            if keys_pressed[pygame.K_UP]:
+                right_paddle_obj.move_up()
+
+    def make_move_for_ai(self, ball_obj: PongBall, right_paddle_obj: PongPaddle):
+        # Need to get move from computer (either 'move_down', 'move_up', or 'stay' should be returned)
+        computer_move: str = AIController.return_decision(
+            ai_difficulty=self.ai_difficulty,
+            ball_trajectory_snapshot=ball_obj.yield_trajectory_prediction_data(),
+            paddle_position={"x": right_paddle_obj.rect.x, "y": right_paddle_obj.rect.y, "height": right_paddle_obj.paddle_height},
+            game_dt=self.dt
+        )
+        if computer_move == "move_down": right_paddle_obj.move_down()
+        elif computer_move == "move_up": right_paddle_obj.move_up()
 
     def set_screen_text(self, msg:str, x_offset_mult:float, y_offset_mult:float) -> None:
         """Multipliers are to offset text coordinate to ideal location on screen 

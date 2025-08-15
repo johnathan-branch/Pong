@@ -34,10 +34,10 @@ class PongBall:
             self._bounce_off_paddle(rect_obj)
     
     def check_and_bounce_at_horizontal_boundary_collision(self) -> None:
-        """Handles ball reflections upon vertical collisions with the screen boundary (upper and lower)."""
-        upper_screen_collision = self.coordinates.y <= self.rect.height/2
+        """Handles ball reflections upon vertical collisions with the screen boundary (lower and upper)."""
         lower_screen_collision = self.coordinates.y >= self.game.screen.get_height() - self.rect.height
-        if (upper_screen_collision or lower_screen_collision): self.y_direction *= -1 # reverse direction trick
+        upper_screen_collision = self.coordinates.y <= self.rect.height/2
+        if (lower_screen_collision or upper_screen_collision): self.y_direction *= -1 # reverse direction trick
 
     def update_circle_rect(self):
         self.rect = pygame.draw.circle(surface=self.game.screen, color="white", center=self.coordinates, radius=self.radius)
@@ -55,12 +55,20 @@ class PongBall:
         self.coordinates.x += self.x_direction * self.max_speed_x * self.current_pcnt_max_speed * self.game.dt
         self.coordinates.y += self.y_direction * self.max_speed_y * self.current_pcnt_max_speed * abs(sin(self.angle)) * self.game.dt
 
+    def yield_trajectory_prediction_data(self) -> dict:
+        return {
+                "x_position": self.coordinates.x,
+                "y_position": self.coordinates.y,
+                "x_velocity": self.x_direction * self.max_speed_x * self.current_pcnt_max_speed,
+                "y_velocity": self.y_direction * self.max_speed_y * self.current_pcnt_max_speed * abs(sin(self.angle)),
+                "x_direction": self.x_direction,
+                "y_direction": self.y_direction,
+                "lower_reflection_bound": self.game.screen.get_height() - self.rect.height,
+                "upper_reflection_bound": self.rect.height/2
+            }
+
     def _bounce_off_paddle(self, rect_obj:pygame.Rect) -> None:
         """Internal method implementation for 'bounce off paddle' logic."""
-        #if self.game.debug_game:
-        #    print("left paddle collision detected")
-        #    print(f"ball y-component relative to paddle: {self.coordinates.y - (PADDLE_HEIGHT * 0.5)}")
-        #    print(f"left paddle y-component: {paddle_rect.y}")
         
         dist_from_paddle_center = ( 
             ( rect_obj.y - ( self.coordinates.y - (rect_obj.height * 0.5) ) ) / rect_obj.height 
