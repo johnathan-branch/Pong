@@ -1,8 +1,7 @@
-# Pong (🚧 Development In Progress 🚧)
-Classic Pong game implemented in Python!
+# 🏓Classic Pong game implemented in Python!
 
-<b>To run the application:</b> <i>Python run.py</i>
+To run the app in default mode (vs AI) and difficulty (easy): <b><i>Python run.py</i></b>
 
-- Right now the user has control of both paddles, for upcoming development I plan on developing a computer opponent to play against.
-    - Left paddle controls: 'a' key moves the left paddle up, 's' key moves the left paddle down.
-    - Right paddle controls: 'up arrow' key moves the right paddle up, 'down arrow' key moves the right paddle down.
+To run the app in vs AI mode at higher difficulty setting (hard): <b><i>Python run.py --difficulty hard</i></b>
+
+To run the app in 2-player mode: <b><i>Python run.py --mode 2p</i></b>
