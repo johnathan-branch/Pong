@@ -111,7 +111,13 @@ class PongGame:
         ball_obj.update_circle_rect()
         pygame.draw.rect(surface=self.screen, color="white", rect=left_paddle_obj.rect)
         pygame.draw.rect(surface=self.screen, color="white", rect=right_paddle_obj.rect)
+
+        # vertical screen divide line
         pygame.draw.line(surface=self.screen, color="gray", start_pos=(self.mid_screen_coordinate[0], 0), end_pos=(self.mid_screen_coordinate[0], self.screen.get_height()))
+        # top horizontal boundary line
+        pygame.draw.line(surface=self.screen, color="gray", start_pos=(0, 0), end_pos=(self.screen.get_width(), 0), width=15) 
+        # bottom horizontal boundary line
+        pygame.draw.line(surface=self.screen, color="gray", start_pos=(0, self.screen.get_height()), end_pos=(self.screen.get_width(), self.screen.get_height()), width=15) 
 
     def end_frame(self) -> None: 
         """

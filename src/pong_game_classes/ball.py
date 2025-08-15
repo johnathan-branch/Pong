@@ -11,7 +11,7 @@ class PongBallDirection(Enum):
 
 class PongBall:
 
-    def __init__(self, radius:float=25.0, max_speed_x:float=500.0, max_speed_y:float=100.0, max_deflect_angle:float=30.0):
+    def __init__(self, radius:float=25.0, max_speed_x:float=900.0, max_speed_y:float=180.0, max_deflect_angle:float=30.0):
         from pong_game_classes.game import PongGame
         
         self.radius: float = radius
@@ -23,7 +23,8 @@ class PongBall:
         self.coordinates = pygame.Vector2(self.game.mid_screen_coordinate)
         self.x_direction = PongBallDirection.LEFT.value
         self.y_direction = PongBallDirection.UP.value
-        self.angle:float = 0.0
+        self.current_pcnt_max_speed: float = 0.5
+        self.angle: float = 0.0
         self.rect = pygame.draw.circle(surface=self.game.screen, color="white", center=self.coordinates, radius=self.radius)
 
 
@@ -46,12 +47,13 @@ class PongBall:
         self.coordinates = pygame.Vector2(self.game.mid_screen_coordinate)
         self.x_direction = random.choice([PongBallDirection.LEFT.value, PongBallDirection.RIGHT.value])
         self.y_direction = PongBallDirection.UP.value
+        self.current_pcnt_max_speed: float = 0.5
         self.angle:float = 0.0
 
     def update_trajectory(self) -> None:
         """Updates ball trajectory, called every frame."""
-        self.coordinates.x += self.x_direction * self.max_speed_x * self.game.dt
-        self.coordinates.y += self.y_direction * self.max_speed_y * abs(sin(self.angle)) * self.game.dt
+        self.coordinates.x += self.x_direction * self.max_speed_x * self.current_pcnt_max_speed * self.game.dt
+        self.coordinates.y += self.y_direction * self.max_speed_y * self.current_pcnt_max_speed * abs(sin(self.angle)) * self.game.dt
 
     def _bounce_off_paddle(self, rect_obj:pygame.Rect) -> None:
         """Internal method implementation for 'bounce off paddle' logic."""
@@ -78,6 +80,7 @@ class PongBall:
         
         self.angle = normalized_dist_from_paddle_center * self.max_deflection_angle
         self.x_direction *= -1 # reverse direction trick
+        self.current_pcnt_max_speed = min( (self.current_pcnt_max_speed*1.05), 1.0) # increase ball speed pcnt each deflection up to max(1.0)
         
         if self.game._debug_game:
             print("left paddle collision detected")
