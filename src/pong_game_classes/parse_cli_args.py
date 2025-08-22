@@ -7,7 +7,7 @@ class GameArgs(argparse.Namespace):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--difficulty", choices=["easy", "hard"], default="easy", help="Game difficulty selection")
-parser.add_argument("--mode", choices=["ai", "2p"], default="ai", help="Game difficulty selection")
-parser.add_argument("--enable_sounds", choices=["0", "1"], default="0", help="Flag to enable turn on/off sound-effects")
+parser.add_argument("--mode", choices=["ai", "2p"], default="ai", help="Game mode selection")
+parser.add_argument("--enable_sounds", choices=["0", "1"], default="0", help="Flag to turn off/on sound-effects")
 
 CLI_ARGS = parser.parse_args(namespace=GameArgs())
