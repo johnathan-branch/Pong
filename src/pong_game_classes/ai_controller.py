@@ -69,7 +69,7 @@ class AIController:
     @staticmethod
     def _simple_tracking_decision(ball_trajectory_snapshot:dict, paddle_position:dict) -> str:
         """
-            Simply instructs the paddle;s movement based on checking ball's y-position relation to the paddle's y-position.
+            Simply instructs the paddle's movement based on checking ball's y-position in relation to the paddle's y-position.
         """
         error_percentage: float = 0.15                                                  # set to add error to output
         if random.randint(1 , 2) % 2 == 1:
