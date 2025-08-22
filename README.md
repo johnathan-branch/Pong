@@ -14,5 +14,5 @@ Include <b><i>--enable_sounds 1</i></b> to enable music and sounds-effects!
 
 # Tech Used
 Python 3.11.5
-- pydub (only used to create statically reference .wav files, the game does not need this to run)
+- pydub (only used to create sound-effect .wav files, the game does not need this to run)
 - pygame

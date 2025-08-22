@@ -27,7 +27,7 @@ class PongGame:
         self._paddle_hit_sound_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\paddle_hit.wav"
         self._score_point_sound_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\score_point.wav"
         self._wall_bounce_sound_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\wall_bounce.wav"
-        self._game_soundtrack_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\8bit-music-for-game copy.mp3"
+        self._game_soundtrack_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\8bit_music_for_game.mp3"
 
         self.screen = pygame.display.set_mode(size=(screen_width, screen_length))
         self.font = pygame.font.SysFont(name="Comic Sans MS", size=30)
