@@ -1,8 +1,8 @@
 import pygame
 from time import sleep
 
-from misc.singleton_decorator import singleton
 from misc.get_parent_dir import ROOT_DIR
+from misc.singleton_decorator import singleton
 from pong_game_classes.ai_controller import AIController
 from pong_game_classes.ball import PongBall
 from pong_game_classes.paddle import PongPaddle
@@ -11,19 +11,24 @@ from pong_game_classes.player import Player
 @singleton
 class PongGame:
 
-    def __init__(self, screen_width:int=1280, screen_length:int=720, mode:str="ai", ai_difficulty:str="easy"):
+    def __init__(self, screen_width:int=1280, screen_length:int=720, mode:str="ai", ai_difficulty:str="easy", enable_sounds:str="0"):
         pygame.init()
-        
+
         self.ai_difficulty: str = ai_difficulty
         self.mode: str = mode
-        self._debug_game: bool = False # set to True to assert debug print statements
+        self.enable_sounds: bool = bool(int(enable_sounds))
+        self._debug_game: bool = False      # set to True to assert debug print statements
         self.has_user_started_game: bool = False
         self.quit_game: bool = False
-        self.points_per_game: int = 3 # change this to set the match point
+        self.points_per_game: int = 3       # change this to set the value of match point
         self.dt: float = 0.0
         self._caption: str = "PY-PONG!"
         self._icon_path: str = str(ROOT_DIR) + "\\resources\\icons\\pong.jpg"
-        
+        self._paddle_hit_sound_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\paddle_hit.wav"
+        self._score_point_sound_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\score_point.wav"
+        self._wall_bounce_sound_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\wall_bounce.wav"
+        self._game_soundtrack_filepath: str = str(ROOT_DIR) + "\\resources\\sounds\\8bit-music-for-game copy.mp3"
+
         self.screen = pygame.display.set_mode(size=(screen_width, screen_length))
         self.font = pygame.font.SysFont(name="Comic Sans MS", size=30)
         self.clock = pygame.time.Clock()
@@ -70,6 +75,7 @@ class PongGame:
 
         if (left_paddle_wins or right_paddle_wins):
             # somone wins (should set score appropriately and reset ball and paddles)
+            if self.enable_sounds: self.play_score_point_sound()
             if left_paddle_wins:    
                 player_1_obj.increment_score()
             else:
@@ -91,6 +97,7 @@ class PongGame:
                 self.set_screen_text(msg=f"{player.get_name()} WINS.", x_offset_mult=x_offsets[idx], y_offset_mult=1.35)
                 self.has_user_started_game = False
                 pygame.display.flip()
+                if self.enable_sounds: self.play_game_soundtrack()
                 sleep(3) # TODO: Try to figure out a better way to transition between games than just having this arbitrary delay.
 
     def close_and_cleanup(self) -> None:
@@ -112,8 +119,8 @@ class PongGame:
         """This method is responsible for drawing all of the screen objects (exclusive of text) and is invoked every frame."""
         #pygame.draw.circle(surface=self.screen, color="white", center=ball_obj.coordinates, radius=ball_obj.radius)
         ball_obj.update_circle_rect()
-        pygame.draw.rect(surface=self.screen, color="white", rect=left_paddle_obj.rect)
-        pygame.draw.rect(surface=self.screen, color="white", rect=right_paddle_obj.rect)
+        pygame.draw.rect(surface=self.screen, color=left_paddle_obj.color, rect=left_paddle_obj.rect)
+        pygame.draw.rect(surface=self.screen, color=right_paddle_obj.color, rect=right_paddle_obj.rect)
 
         # vertical screen divide line
         pygame.draw.line(surface=self.screen, color="gray", start_pos=(self.mid_screen_coordinate[0], 0), end_pos=(self.mid_screen_coordinate[0], self.screen.get_height()))
@@ -133,9 +140,16 @@ class PongGame:
         # dt is delta time in seconds since last frame, used for framerate-independent physics
         self.dt = self.clock.tick(60) / 1000
 
-    def return_rect(self, object_containing_rect):
-        """Adapter that takes in an object containing a Pygame.Rect field and returns the Rect."""
-        return object_containing_rect.rect
+    def make_move_for_ai(self, ball_obj: PongBall, right_paddle_obj: PongPaddle):
+        # Need to get move from computer (either 'move_down', 'move_up', or 'stay' should be returned)
+        computer_move: str = AIController.return_decision(
+            ai_difficulty=self.ai_difficulty,
+            ball_trajectory_snapshot=ball_obj.yield_trajectory_prediction_data(),
+            paddle_position={"x": right_paddle_obj.rect.x, "y": right_paddle_obj.rect.y, "height": right_paddle_obj.paddle_height},
+            game_dt=self.dt
+        )
+        if computer_move == "move_down": right_paddle_obj.move_down()
+        elif computer_move == "move_up": right_paddle_obj.move_up()
 
     def map_user_key_press(self, left_paddle_obj: PongPaddle, right_paddle_obj: PongPaddle) -> None:
         """
@@ -156,16 +170,28 @@ class PongGame:
             if keys_pressed[pygame.K_UP]:
                 right_paddle_obj.move_up()
 
-    def make_move_for_ai(self, ball_obj: PongBall, right_paddle_obj: PongPaddle):
-        # Need to get move from computer (either 'move_down', 'move_up', or 'stay' should be returned)
-        computer_move: str = AIController.return_decision(
-            ai_difficulty=self.ai_difficulty,
-            ball_trajectory_snapshot=ball_obj.yield_trajectory_prediction_data(),
-            paddle_position={"x": right_paddle_obj.rect.x, "y": right_paddle_obj.rect.y, "height": right_paddle_obj.paddle_height},
-            game_dt=self.dt
-        )
-        if computer_move == "move_down": right_paddle_obj.move_down()
-        elif computer_move == "move_up": right_paddle_obj.move_up()
+    def play_sound(self, filepath:str):
+        """Plays bounce sound effect once."""
+        pygame.mixer.music.load(filename=filepath)
+        pygame.mixer.music.play()
+
+    def play_paddle_hit_sound(self):
+        self.play_sound(filepath=self._paddle_hit_sound_filepath)
+
+    def play_wall_bounce_sound(self):
+        self.play_sound(filepath=self._wall_bounce_sound_filepath)
+
+    def play_score_point_sound(self):
+        self.play_sound(filepath=self._score_point_sound_filepath)
+
+    def play_game_soundtrack(self):
+        """Plays bounce sound effect in an infinite-loop."""
+        pygame.mixer.music.load(filename=self._game_soundtrack_filepath)
+        pygame.mixer.music.play(loops=-1)
+
+    def return_rect(self, object_containing_rect):
+        """Adapter that takes in an object containing a Pygame.Rect field and returns the Rect."""
+        return object_containing_rect.rect
 
     def set_screen_text(self, msg:str, x_offset_mult:float, y_offset_mult:float) -> None:
         """Multipliers are to offset text coordinate to ideal location on screen 

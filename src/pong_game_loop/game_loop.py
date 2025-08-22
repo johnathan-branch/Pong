@@ -11,7 +11,7 @@ class GameLoop:
     def __init__(self):
     
         # game objects instantiations (game, players, left_paddle, right_paddle, and ball)
-        self.game_instance = PongGame(mode=CLI_ARGS.mode, ai_difficulty=CLI_ARGS.difficulty)
+        self.game_instance = PongGame(mode=CLI_ARGS.mode, ai_difficulty=CLI_ARGS.difficulty, enable_sounds=CLI_ARGS.enable_sounds)
 
         self.player_1 = Player(name="P1-  ")
         if self.game_instance.mode == "2p": self.player_2 = Player(name="P2-  ")
@@ -20,6 +20,7 @@ class GameLoop:
         self.right_paddle = PongPaddle(player_assigned=self.player_2, left_side_paddle=False)
         self.ball = PongBall()
         print(f"\nGame Mode: {self.game_instance.mode}, Game Difficulty: {self.game_instance.ai_difficulty}\n")
+        if self.game_instance.enable_sounds: self.game_instance.play_game_soundtrack()
 
     def start(self):
         # game loop

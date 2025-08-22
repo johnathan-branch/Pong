@@ -18,9 +18,11 @@ class PongPaddle:
         self.pos_top: float = self.game.mid_screen_coordinate[1] - (self.paddle_height  * 0.5) 
 
         if left_side_paddle:
-            self.pos_left: float = self.game.screen.get_width() * PADDLE_LEFT_OFFSET                             
+            self.pos_left: float = self.game.screen.get_width() * PADDLE_LEFT_OFFSET   
+            self.color: str = "blue"                          
         else:
-            self.pos_left: float = self.game.screen.get_width() * (1 - PADDLE_LEFT_OFFSET) - self.paddle_width                             
+            self.pos_left: float = self.game.screen.get_width() * (1 - PADDLE_LEFT_OFFSET) - self.paddle_width   
+            self.color: str = "red"                            
         
         self.rect = pygame.Rect(self.pos_left, self.pos_top, self.paddle_width, self.paddle_height)
 

@@ -18,6 +18,8 @@ class PongBall:
         self.max_speed_x: float = max_speed_x
         self.max_speed_y: float = max_speed_y
         self.max_deflection_angle: float = max_deflect_angle
+        self.color: str = "white"
+        self.outline_color = "blue"
 
         self.game = PongGame() # reference to game singleton instance
         self.coordinates = pygame.Vector2(self.game.mid_screen_coordinate)
@@ -32,15 +34,21 @@ class PongBall:
         """Handles ball reflections upon horizontal collisions with any rect object passed in."""
         if rect_obj.colliderect(self.rect):
             self._bounce_off_paddle(rect_obj)
+            if self.game.enable_sounds: self.game.play_paddle_hit_sound()
     
     def check_and_bounce_at_horizontal_boundary_collision(self) -> None:
         """Handles ball reflections upon vertical collisions with the screen boundary (lower and upper)."""
         lower_screen_collision = self.coordinates.y >= self.game.screen.get_height() - self.rect.height
         upper_screen_collision = self.coordinates.y <= self.rect.height/2
-        if (lower_screen_collision or upper_screen_collision): self.y_direction *= -1 # reverse direction trick
+        if (lower_screen_collision or upper_screen_collision): 
+            self.y_direction *= -1 # reverse direction trick
+            if self.game.enable_sounds: self.game.play_wall_bounce_sound()
 
     def update_circle_rect(self):
-        self.rect = pygame.draw.circle(surface=self.game.screen, color="white", center=self.coordinates, radius=self.radius)
+        if self.x_direction == PongBallDirection.LEFT.value: self.outline_color = "red"
+        else: self.outline_color = "blue"
+        self.rect = pygame.draw.circle(surface=self.game.screen, color=self.color, center=self.coordinates, radius=self.radius)
+        pygame.draw.arc(surface=self.game.screen, color=self.outline_color, rect=self.rect, start_angle=0, stop_angle=360, width=1)
 
     def reset(self):
         """Resets ball coordinates and directional fields to initial defaults."""

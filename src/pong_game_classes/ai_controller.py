@@ -1,3 +1,5 @@
+import random
+
 class AIController:
 
     @staticmethod
@@ -32,6 +34,10 @@ class AIController:
                     "height": float
                 }    
         """
+        error_percentage: float = 0.05                                                  # set to add error to output
+        if random.randint(1 , 2) % 2 == 1:
+            error_percentage *= -1                                                      # flip sign if random int is odd                                             
+
         time_to_cross_x_threshold: float = abs((paddle_position["x"] - ball_trajectory_snapshot["x_position"]) / ball_trajectory_snapshot["x_velocity"])
 
         ball_y_pos_predicted: int = ball_trajectory_snapshot["y_position"]              # set to current y-position
@@ -55,6 +61,7 @@ class AIController:
      
             time_left -= time_step
         
+        ball_y_pos_predicted *= (1 - error_percentage) # Adding some error to value to make game more realistic
         if ball_y_pos_predicted < paddle_position["y"] + (paddle_position["height"]*0.5): return "move_up"
         elif ball_y_pos_predicted > paddle_position["y"] + (paddle_position["height"]*0.5): return "move_down"
         else: return "stay"
@@ -64,8 +71,13 @@ class AIController:
         """
             Simply instructs the paddle;s movement based on checking ball's y-position relation to the paddle's y-position.
         """
+        error_percentage: float = 0.15                                                  # set to add error to output
+        if random.randint(1 , 2) % 2 == 1:
+            error_percentage *= -1                                                      # flip sign if random int is odd 
+
         result: str = "stay"
+        conditional_value: float = ball_trajectory_snapshot["y_position"] * (1 - error_percentage)
         if ball_trajectory_snapshot["x_direction"] == 1:
-            if ball_trajectory_snapshot["y_position"] < paddle_position["y"] + (paddle_position["height"]*0.5): result = "move_up"
-            elif ball_trajectory_snapshot["y_position"] > paddle_position["y"] + (paddle_position["height"]*0.5): result = "move_down"
+            if conditional_value < paddle_position["y"] + (paddle_position["height"]*0.5): result = "move_up"
+            elif conditional_value > paddle_position["y"] + (paddle_position["height"]*0.5): result = "move_down"
         return result
