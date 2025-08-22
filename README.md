@@ -11,3 +11,8 @@ To run the app in 2-player mode: <b><i>Python src/run.py --mode 2p</i></b>
 ![Two-Player-Start-Screen](resources/gameplay_images/two_player_mode_start_screen.JPG)
 
 Include <b><i>--enable_sounds 1</i></b> to enable music and sounds-effects!
+
+# Tech Used
+Python 3.11.5
+- pydub (only used to create statically reference .wav files, the game does not need this to run)
+- pygame
